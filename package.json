@@ -1,0 +1,17 @@
+{
+    "name": "smiley-bbcode-editor",
+    "version": "1.0.0",
+    "private": true,
+    "license": "AGPL-3.0-only",
+    "type": "module",
+    "description": "Small static, local-first BBCode editor and previewer for F-List profiles.",
+    "scripts": {
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "test": "node --test \"tests/*.test.js\"",
+        "serve": "npx --yes serve ."
+    },
+    "devDependencies": {
+        "prettier": "^3.3.3"
+    }
+}

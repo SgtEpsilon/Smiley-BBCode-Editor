@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Smiley BBCode Editor</title>
+        <meta
+            name="description"
+            content="A small local editor and previewer for F-List BBCode."
+        />
+        <link rel="stylesheet" href="css/editor.css" />
+        <link rel="stylesheet" href="css/preview.css" />
+    </head>
+    <body>
+        <div class="app">
+            <header class="topbar">
+                <h1>Smiley BBCode Editor</h1>
+                <div class="controls">
+                    <label>
+                        Colors
+                        <select id="setting-palette">
+                            <option value="classic">Classic</option>
+                            <option value="vanilla">Vanilla</option>
+                        </select>
+                    </label>
+                    <label>
+                        Collapses start
+                        <select id="setting-collapse">
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </label>
+                    <button type="button" id="copy" class="btn">
+                        Copy BBCode
+                    </button>
+                    <button type="button" id="example" class="btn">
+                        Example
+                    </button>
+                </div>
+            </header>
+
+            <main class="layout">
+                <section class="pane" aria-label="Editor">
+                    <div class="pane-title">
+                        <h2>BBCode</h2>
+                        <span id="count" class="muted"></span>
+                    </div>
+                    <div id="toolbar" class="toolbar"></div>
+                    <div id="color-popover" class="color-popover" hidden></div>
+                    <textarea
+                        id="input"
+                        spellcheck="false"
+                        placeholder="Type your BBCode here..."
+                    ></textarea>
+                    <details id="inlines" class="inlines">
+                        <summary>
+                            Inline images
+                            <span id="inline-count" class="muted"></span>
+                        </summary>
+                        <div class="inlines-body">
+                            <p class="muted">
+                                Pick images from your computer and give each the
+                                id you use in
+                                <code>[img=ID]</code>. They stay in this page
+                                only until you reload it, and are never
+                                uploaded.
+                            </p>
+                            <div class="inlines-actions">
+                                <button
+                                    type="button"
+                                    id="inline-add"
+                                    class="btn"
+                                >
+                                    Add images
+                                </button>
+                                <span class="muted">or drop files here</span>
+                                <input
+                                    type="file"
+                                    id="inline-file"
+                                    accept="image/*"
+                                    multiple
+                                    hidden
+                                />
+                            </div>
+                            <ul id="inline-list" class="inline-list"></ul>
+                        </div>
+                    </details>
+                </section>
+
+                <section class="pane" aria-label="Preview">
+                    <div class="pane-title">
+                        <h2>Preview</h2>
+                    </div>
+                    <div
+                        id="preview"
+                        class="preview"
+                        data-palette="classic"
+                    ></div>
+                    <details id="warnings" class="warnings" open>
+                        <summary id="warnings-summary">No warnings</summary>
+                        <ul id="warnings-list"></ul>
+                    </details>
+                </section>
+            </main>
+        </div>
+
+        <script type="module" src="js/app.js"></script>
+    </body>
+</html>
