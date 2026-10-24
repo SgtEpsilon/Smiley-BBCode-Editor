@@ -73,6 +73,43 @@
     box-sizing: border-box;
 }
 
+/* themes: the base .preview above is the default theme. Dark and light follow
+   Horizon's themes; the editor side (backdrop, swatches) never gets a theme */
+
+.preview[data-theme='dark'] {
+    --text: #ccc;
+    --bg: #000;
+    --link: #fff;
+    --muted: #666;
+}
+
+.preview[data-theme='light'] {
+    --text: #191919;
+    --bg: #e5e5e5;
+    --link: #007bff;
+    --muted: #7f7f7f;
+    --panel: rgba(0, 0, 0, 0.06);
+    --border: rgba(0, 0, 0, 0.15);
+
+    color-scheme: light;
+}
+
+/* on light, Classic's pastels wash out, so it takes Horizon's own colors (white
+   and gray become the same shade); vanilla keeps its fixed colors everywhere */
+[data-theme='light'][data-palette='classic'] {
+    --c-red: #f00;
+    --c-orange: #f60;
+    --c-purple: #93f;
+    --c-blue: #00f;
+    --c-white: #999;
+    --c-yellow: #bcab17;
+    --c-pink: #da1677;
+    --c-gray: #999;
+    --c-green: #036603;
+    --c-black: #191919;
+    --c-cyan: #209898;
+}
+
 .preview a {
     color: var(--link);
     text-decoration: underline;
@@ -99,11 +136,36 @@
 
 /* text */
 
-/* black disappears on the dark background, so it gets a soft glow */
-.preview [data-color='black'] {
+/* black disappears on the dark backgrounds, so it gets a soft glow */
+.preview:not([data-theme='light']) [data-color='black'] {
     text-shadow:
         #777 0 1px 2px,
         #9e9e9e 0 0 2px;
+}
+
+/* vanilla white and purple disappear on light and default; Horizon outlines them */
+.preview[data-theme='light'][data-palette='vanilla'] [data-color='white'] {
+    text-shadow:
+        #666 1px 0,
+        #666 -1px 0,
+        #666 0 1px,
+        #666 0 -1px,
+        #666 1px 1px,
+        #666 -1px 1px,
+        #666 1px -1px,
+        #666 -1px -1px;
+}
+
+.preview[data-theme='default'][data-palette='vanilla'] [data-color='purple'] {
+    text-shadow:
+        #306 1px 0,
+        #306 -1px 0,
+        #306 0 1px,
+        #306 0 -1px,
+        #306 1px 1px,
+        #306 -1px 1px,
+        #306 1px -1px,
+        #306 -1px -1px;
 }
 
 .preview .big {

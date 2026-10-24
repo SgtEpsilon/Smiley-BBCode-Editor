@@ -36,6 +36,10 @@ The only things it fetches from F-List are character icons and eicons
   Click one to jump to its line.
 - A **Classic / Vanilla** color palette, to check that your colors stay
   readable with either.
+- A **Dark / Default / Light** preview theme, to see how your profile looks to
+  readers with each. On Light, Classic colors change the way Horizon's Light
+  theme does: white and gray become the same shade, and cyan, yellow, pink and
+  green get darker. Only the preview changes; the editor stays dark.
 - **Inline images, local only.** `[img=ID]name[/img]` shows an image you add
   from your own computer under "Inline images". Give each image the id your
   profile uses. Images are kept in memory only, so add them again after a

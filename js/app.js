@@ -27,7 +27,7 @@ function syncScroll() {
 
 const SETTINGS_KEY = 'fbb.settings';
 const DRAFT_KEY = 'fbb.draft';
-const DEFAULTS = { palette: 'classic', collapse: 'open' };
+const DEFAULTS = { theme: 'default', palette: 'classic', collapse: 'open' };
 
 // localStorage can throw (private windows, blocked cookies); the editor works without it
 function save(key, value) {
@@ -186,6 +186,9 @@ document.addEventListener('keydown', event => {
 // settings
 
 function applySettings() {
+    // only the preview gets the theme; the editor and swatches stay readable on dark
+    preview.dataset.theme = settings.theme;
+
     // the swatches share the preview's palette
     preview.dataset.palette = settings.palette;
     colorPopover.dataset.palette = settings.palette;

@@ -17,6 +17,14 @@
                 <h1>Smiley BBCode Editor</h1>
                 <div class="controls">
                     <label>
+                        Theme
+                        <select id="setting-theme">
+                            <option value="dark">Dark</option>
+                            <option value="default">Default</option>
+                            <option value="light">Light</option>
+                        </select>
+                    </label>
+                    <label>
                         Colors
                         <select id="setting-palette">
                             <option value="classic">Classic</option>
@@ -98,6 +106,7 @@
                         id="preview"
                         class="preview"
                         data-palette="classic"
+                        data-theme="default"
                     ></div>
                     <details id="warnings" class="warnings" open>
                         <summary id="warnings-summary">No warnings</summary>
