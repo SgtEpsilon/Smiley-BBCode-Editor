@@ -47,11 +47,14 @@
                     </div>
                     <div id="toolbar" class="toolbar"></div>
                     <div id="color-popover" class="color-popover" hidden></div>
-                    <textarea
-                        id="input"
-                        spellcheck="false"
-                        placeholder="Type your BBCode here..."
-                    ></textarea>
+                    <div id="editor-wrap" class="editor-wrap">
+                        <pre id="backdrop" aria-hidden="true"></pre>
+                        <textarea
+                            id="input"
+                            spellcheck="false"
+                            placeholder="Type your BBCode here..."
+                        ></textarea>
+                    </div>
                     <details id="inlines" class="inlines">
                         <summary>
                             Inline images

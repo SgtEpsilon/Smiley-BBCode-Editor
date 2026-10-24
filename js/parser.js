@@ -28,7 +28,7 @@ function scanParam(input, from, name) {
     return -1;
 }
 
-function readTag(input, start) {
+export function readTag(input, start) {
     TAG_START_RE.lastIndex = start;
     const match = TAG_START_RE.exec(input);
     if (!match) return null;
@@ -55,7 +55,7 @@ function readTag(input, start) {
     return { closing, name, def: defs[name], param, start, end: pos + 1 };
 }
 
-function findCloser(input, from, name) {
+export function findCloser(input, from, name) {
     const re = new RegExp('\\[\\s*/\\s*' + name + '\\s*\\]', 'ig');
     re.lastIndex = from;
     return re.exec(input);

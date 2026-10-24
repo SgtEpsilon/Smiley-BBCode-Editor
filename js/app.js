@@ -1,6 +1,7 @@
 import { COLORS } from './tags.js';
 import { parse } from './parser.js';
 import { render } from './render.js';
+import { highlight } from './highlight.js';
 import { createEditor, TOOLBAR, findShortcut } from './editor.js';
 import {
     images,
@@ -17,6 +18,12 @@ const make = (tag, props) => Object.assign(document.createElement(tag), props);
 const input = $('input');
 const preview = $('preview');
 const colorPopover = $('color-popover');
+const backdrop = $('backdrop');
+
+function syncScroll() {
+    backdrop.scrollTop = input.scrollTop;
+    backdrop.scrollLeft = input.scrollLeft;
+}
 
 const SETTINGS_KEY = 'fbb.settings';
 const DRAFT_KEY = 'fbb.draft';
@@ -88,6 +95,10 @@ function update() {
         warnings,
     });
     preview.replaceChildren(fragment);
+
+    // the trailing newline keeps a final empty line from collapsing
+    backdrop.innerHTML = highlight(text) + '\n';
+    syncScroll();
 
     warnings.sort((a, b) => a.index - b.index);
     showWarnings(warnings, text);
@@ -166,6 +177,8 @@ input.addEventListener('input', event => {
     update();
 });
 
+input.addEventListener('scroll', syncScroll);
+
 document.addEventListener('keydown', event => {
     if (event.key === 'Escape') colorPopover.hidden = true;
 });
@@ -176,6 +189,7 @@ function applySettings() {
     // the swatches share the preview's palette
     preview.dataset.palette = settings.palette;
     colorPopover.dataset.palette = settings.palette;
+    backdrop.dataset.palette = settings.palette;
 }
 
 function bindSetting(name) {
