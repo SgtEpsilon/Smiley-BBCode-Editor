@@ -11,6 +11,7 @@ import {
     removeImage,
 } from './inlines.js';
 import { sample } from './sample.js';
+import { createVisual } from './visual.js';
 
 const $ = id => document.getElementById(id);
 const make = (tag, props) => Object.assign(document.createElement(tag), props);
@@ -25,7 +26,10 @@ function syncScroll() {
     backdrop.scrollLeft = input.scrollLeft;
 }
 
+const visualPane = $('visual');
+
 const SETTINGS_KEY = 'fbb.settings';
+const TAB_KEY = 'fbb.tab';
 const DRAFT_KEY = 'fbb.draft';
 const DEFAULTS = { theme: 'default', palette: 'classic', collapse: 'open' };
 
@@ -73,7 +77,7 @@ function showWarnings(warnings, text) {
             className: 'warning-link',
             textContent: `Line ${line}: ${warning.message}`,
         });
-        button.addEventListener('click', () => editor.jumpTo(warning.index));
+        button.addEventListener('click', () => target().jumpTo(warning.index));
 
         const item = make('li');
         item.appendChild(button);
@@ -156,7 +160,7 @@ async function syncEicons() {
     const inUse = new Set(
         [...preview.querySelectorAll('img.eicon')].map(img => img.src)
     );
-    
+
     eiconUrls = [...eiconUrls, ...urls.values()].filter(url => {
         if (inUse.has(url)) return true;
         URL.revokeObjectURL(url);
@@ -181,6 +185,36 @@ const ui = {
         colorPopover.hidden = !colorPopover.hidden;
     },
 };
+
+// the visual tab edits through the same toolbar; target() is whichever is showing
+const visual = createVisual({
+    textarea: input,
+    root: visualPane,
+    editor,
+    ui,
+    dialog: $('ask'),
+});
+const target = () => (visual.active ? visual.adapter : editor);
+
+function showTab(name) {
+    const isVisual = name === 'visual';
+    if (isVisual === visual.active) return;
+
+    if (isVisual) visual.show();
+    else visual.hide();
+
+    $('tab-source').setAttribute('aria-selected', String(!isVisual));
+    $('tab-visual').setAttribute('aria-selected', String(isVisual));
+    save(TAB_KEY, name);
+}
+
+$('tab-source').addEventListener('click', () => showTab('source'));
+$('tab-visual').addEventListener('click', () => showTab('visual'));
+
+// keeps the selection in the visual tab while a toolbar button is pressed
+$('toolbar').addEventListener('mousedown', event => {
+    if (visual.active) event.preventDefault();
+});
 
 function shortcutLabel(item) {
     if (!item.key) return '';
@@ -208,7 +242,7 @@ function buildToolbar() {
             if (item.icon) button.innerHTML = item.icon;
             else button.textContent = item.label;
 
-            button.addEventListener('click', () => item.run(editor, ui));
+            button.addEventListener('click', () => item.run(target(), ui));
             $('toolbar').appendChild(button);
         }
     });
@@ -224,7 +258,7 @@ function buildToolbar() {
 
         swatch.addEventListener('click', () => {
             colorPopover.hidden = true;
-            editor.color(name);
+            target().color(name);
         });
         colorPopover.appendChild(swatch);
     }
@@ -259,6 +293,8 @@ function applySettings() {
 
     // the swatches share the preview's palette
     preview.dataset.palette = settings.palette;
+    visualPane.dataset.theme = settings.theme;
+    visualPane.dataset.palette = settings.palette;
     colorPopover.dataset.palette = settings.palette;
     backdrop.dataset.palette = settings.palette;
 }
@@ -298,7 +334,7 @@ $('example').addEventListener('click', () => {
     if (replacing && !confirm('Replace the current text with the example?'))
         return;
 
-    editor.replaceAll(sample);
+    target().replaceAll(sample);
     collapseState.clear();
     spoilerState.clear();
 });
@@ -366,6 +402,7 @@ function refreshImages() {
     $('inline-list').replaceChildren(...images.map(imageRow));
     $('inline-count').textContent = images.length ? `(${images.length})` : '';
     update();
+    visual.refresh();
 }
 
 function addFiles(files) {
@@ -406,3 +443,5 @@ applySettings();
 const draft = load(DRAFT_KEY);
 input.value = draft === null ? sample : draft;
 update();
+
+if (load(TAB_KEY) === 'visual') showTab('visual');
