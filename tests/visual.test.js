@@ -228,3 +228,25 @@ test('visual: going back to the BBCode tab keeps the caret where it was', async 
     assert.equal(textarea.selectionStart, 10); // between c and d
     assert.equal(root.hidden, true);
 });
+
+test('visual: a marked line is highlighted, and unmarking clears it', async () => {
+    const highlights = new Map();
+    globalThis.CSS = { highlights };
+    globalThis.Highlight = class {
+        constructor(range) {
+            this.range = range;
+        }
+    };
+
+    try {
+        const { visual } = await make('first\n[b]second[/b]\nthird');
+        visual.setMark({ start: 6, end: 19 });
+        assert.equal(highlights.get('warning-line').range.toString(), 'second');
+
+        visual.setMark(null);
+        assert.equal(highlights.has('warning-line'), false);
+    } finally {
+        delete globalThis.CSS;
+        delete globalThis.Highlight;
+    }
+});

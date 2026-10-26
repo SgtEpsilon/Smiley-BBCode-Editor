@@ -178,6 +178,7 @@ export function createVisual({ textarea, root, editor, ui, dialog }) {
     let history = [];
     let position = -1;
     let pushedAt = 0;
+    let marked = null; // { start, end } in the BBCode: a line to highlight
 
     // selection
 
@@ -248,11 +249,28 @@ export function createVisual({ textarea, root, editor, ui, dialog }) {
 
         root.replaceChildren(fragment);
         tidy();
+        paintMark();
 
         if (start === undefined) return;
         lastSel = { start, end };
         root.focus({ preventScroll: true });
         setSelection(start, end);
+    }
+
+    // the highlight is a Range, which the browser keeps in place while you type, and
+    // it is drawn again from the offsets after every redraw
+    function paintMark() {
+        const highlights = globalThis.CSS?.highlights;
+        if (!highlights || typeof Highlight === 'undefined') return;
+
+        highlights.delete('warning-line');
+        if (!active || !marked || marked.start >= marked.end) return;
+
+        const scanned = scan(root);
+        const range = document.createRange();
+        range.setStart(...offsetToPoint(root, scanned, marked.start));
+        range.setEnd(...offsetToPoint(root, scanned, marked.end));
+        highlights.set('warning-line', new Highlight(range));
     }
 
     // BBCode text from the page, passed on so the raw text and the preview follow
@@ -687,6 +705,7 @@ export function createVisual({ textarea, root, editor, ui, dialog }) {
             const { start, end } = currentSel();
             sync();
             active = false;
+            paintMark();
             root.hidden = true;
             root.parentNode.classList.remove('visual-on');
 
@@ -703,5 +722,11 @@ export function createVisual({ textarea, root, editor, ui, dialog }) {
         },
 
         jumpTo: adapter.jumpTo,
+
+        // highlights a stretch of the BBCode (null for none), like a warning's line
+        setMark(range) {
+            marked = range;
+            paintMark();
+        },
     };
 }

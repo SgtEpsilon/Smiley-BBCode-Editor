@@ -20,10 +20,61 @@ const input = $('input');
 const preview = $('preview');
 const colorPopover = $('color-popover');
 const backdrop = $('backdrop');
+const linemark = $('linemark');
 
 function syncScroll() {
-    backdrop.scrollTop = input.scrollTop;
-    backdrop.scrollLeft = input.scrollLeft;
+    for (const layer of [backdrop, linemark]) {
+        layer.scrollTop = input.scrollTop;
+        layer.scrollLeft = input.scrollLeft;
+    }
+}
+
+// the warning last clicked; its line stays highlighted until the warning is gone
+let pinned = null;
+
+// the warning may have moved or gone since the text changed: follow the one with
+// the same message nearest to where it was
+function trackPinned(warnings) {
+    if (!pinned) return;
+
+    const same = warnings.filter(warning => warning.message === pinned.message);
+    if (!same.length) {
+        pinned = null;
+        return;
+    }
+
+    const distance = warning => Math.abs(warning.index - pinned.index);
+    pinned.index = same.reduce((best, warning) =>
+        distance(warning) < distance(best) ? warning : best
+    ).index;
+}
+
+function drawPinned(text) {
+    let range = null;
+
+    if (pinned) {
+        const start = pinned.index
+            ? text.lastIndexOf('\n', pinned.index - 1) + 1
+            : 0;
+        const found = text.indexOf('\n', pinned.index);
+        range = { start, end: found === -1 ? text.length : found };
+    }
+
+    // the BBCode tab: text before, the line, text after, so it lines up with the text
+    if (range) {
+        const line = make('mark', {
+            textContent: text.slice(range.start, range.end),
+        });
+        linemark.replaceChildren(
+            text.slice(0, range.start),
+            line,
+            text.slice(range.end) + '\n'
+        );
+    } else {
+        linemark.replaceChildren();
+    }
+
+    visual.setMark(range);
 }
 
 const visualPane = $('visual');
@@ -77,7 +128,11 @@ function showWarnings(warnings, text) {
             className: 'warning-link',
             textContent: `Line ${line}: ${warning.message}`,
         });
-        button.addEventListener('click', () => target().jumpTo(warning.index));
+        button.addEventListener('click', () => {
+            pinned = { message: warning.message, index: warning.index };
+            drawPinned(input.value);
+            target().jumpTo(warning.index);
+        });
 
         const item = make('li');
         item.appendChild(button);
@@ -105,6 +160,8 @@ function update() {
     syncScroll();
 
     warnings.sort((a, b) => a.index - b.index);
+    trackPinned(warnings);
+    drawPinned(text);
     showWarnings(warnings, text);
     $('count').textContent = `${text.length.toLocaleString()} characters`;
     save(DRAFT_KEY, text);

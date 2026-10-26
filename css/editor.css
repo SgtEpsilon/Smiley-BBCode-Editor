@@ -267,7 +267,8 @@ input[type='text'] {
 }
 
 #input,
-#backdrop {
+#backdrop,
+#linemark {
     border: 0;
     font: inherit;
     inset: 0;
@@ -296,6 +297,28 @@ input[type='text'] {
 
 #input::placeholder {
     color: var(--muted);
+}
+
+/* the line of the warning that was clicked, behind the colored text */
+
+#linemark {
+    color: transparent;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+#linemark mark {
+    background: rgba(230, 180, 80, 0.28);
+    border-radius: 2px;
+    color: transparent;
+}
+
+::highlight(warning-line) {
+    background: rgba(230, 180, 80, 0.3);
+}
+
+.visual-on #linemark {
+    display: none;
 }
 
 #backdrop {
