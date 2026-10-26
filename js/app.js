@@ -106,6 +106,67 @@ function update() {
     save(DRAFT_KEY, text);
 }
 
+// eicon sync
+
+const UNSYNCED = 'img.eicon:not([data-synced])';
+const eiconBlobs = new Map();
+let eiconUrls = [];
+
+// only fetch if it's not in cache
+function fetchEicon(src) {
+    if (!eiconBlobs.has(src)) {
+        const blob = fetch(src).then(response => {
+            if (!response.ok) throw new Error(response.statusText);
+            return response.blob();
+        });
+
+        blob.catch(() => eiconBlobs.delete(src));
+        eiconBlobs.set(src, blob);
+    }
+
+    return eiconBlobs.get(src);
+}
+
+async function syncEicons() {
+    const all = preview.querySelectorAll('img.eicon');
+    if (![...all].every(img => img.complete)) return;
+
+    // an eicon used twice shares one URL, and a failed download keeps the plain image
+    const urls = new Map();
+    const sources = new Set(
+        [...preview.querySelectorAll(UNSYNCED)].map(img => img.src)
+    );
+
+    await Promise.all(
+        [...sources].map(async src => {
+            try {
+                urls.set(src, URL.createObjectURL(await fetchEicon(src)));
+            } catch {}
+        })
+    );
+
+    // data-synced keeps the loads of the new URLs from starting another sync
+    for (const img of preview.querySelectorAll(UNSYNCED)) {
+        if (!urls.has(img.src)) continue;
+        img.dataset.synced = '';
+        img.src = urls.get(img.src);
+    }
+
+    eiconUrls.forEach(url => URL.revokeObjectURL(url));
+    eiconUrls = [...urls.values()];
+}
+
+// prevent an error blocking things
+for (const type of ['load', 'error']) {
+    preview.addEventListener(
+        type,
+        event => {
+            if (event.target.matches(UNSYNCED)) syncEicons();
+        },
+        true
+    );
+}
+
 // toolbar
 
 const ui = {
