@@ -152,8 +152,15 @@ async function syncEicons() {
         img.src = urls.get(img.src);
     }
 
-    eiconUrls.forEach(url => URL.revokeObjectURL(url));
-    eiconUrls = [...urls.values()];
+    // syncs can overlap, so only URLs that no eicon is using are revoked
+    const inUse = new Set(
+        [...preview.querySelectorAll('img.eicon')].map(img => img.src)
+    );
+    
+    eiconUrls = [...eiconUrls, ...urls.values()].filter(url => {
+        if (inUse.has(url)) return true;
+        URL.revokeObjectURL(url);
+    });
 }
 
 // prevent an error blocking things
